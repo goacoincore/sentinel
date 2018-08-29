@@ -1,80 +1,82 @@
-# GoaCoin Sentinel
+# Goacoin Sentinel
 
-From original code https://github.com/dashpay/sentinel
+*You only need this if you are running a masternode and getting WATCHDOG_EXPIRED*
 
-An all-powerful toolset for GoaCoin.
+Please test it and consider it to be a **beta**, something might fail (I don't have goacoin in Windows).
 
-Sentinel is an autonomous agent for persisting, processing and automating GoaCoin V12.1 governance objects and tasks, and for expanded functions in the upcoming GoaCoin V13 release (Evolution).
+Pick an executable (either win/lin) from https://github.com/ZonnCash/sentinel-win64/releases
+Just for reference, sentinel-win64 virustotal (3/67): 
 
-Sentinel is implemented as a Python application that binds to a local version 12.1 goacoind instance on each GoaCoin V12.1 Masternode.
+Use at your own risk, it has been compiled exactly as the Github repo says
 
-This guide covers installing Sentinel onto an existing 12.1 Masternode in Ubuntu 14.04 / 16.04.
+## Before running it
 
-## Installation
+**1.** Make sure you are running v0.12.2.2
 
-### 1. Install Prerequisites
+**2.** Close your wallet
 
-Make sure Python version 2.7.x or above is installed:
+**3.** Go to goacoincore folder and delete "mncache.dat" and "mnpayments.dat"
 
-    python --version
+**4.** Make sure your "goacoin.conf" contains, at least, the following data:
+rpcuser=someuser
+rpcpassword=somepass
+server=1
+rpcport=1948
+rpcconnect=127.0.0.1
 
-Update system packages and ensure virtualenv is installed:
+Try to make rcpuser and rpcpassword hard to guess, you won't need to remember/use them for anything else, so feel free to smash the keyboard
 
-    $ sudo apt-get update
-    $ sudo apt-get -y install python-virtualenv
+**5.** Open wallet. Resync the whole wallet, from the menu "Tools" > "Wallet Repair" > "Rebuild Index"
 
-Make sure the local GoaCoin daemon running is at least version 12.1 (120100)
+**6.** Make sure the wallet is running and completely synced before continuing
 
-    $ goacoin-cli getinfo | grep version
+## How to
 
-### 2. Install Sentinel
+To make it point to your goacoin.conf, you have three options:
 
-Clone the Sentinel repo and install Python dependencies.
+**A)** Create a file **sentinel.conf** in the same folder as the EXE with the following content:
+goacoin_conf=C:\path\to\goacoin.conf
 
-    $ git clone https://github.com/goacoincore/sentinel.git && cd sentinel
-    $ virtualenv ./venv
-    $ ./venv/bin/pip install -r requirements.txt
+Start sentinel-win64.exe
 
-### 3. Set up Cron
+**B)** From a console, execute the EXE by passing arguments 
+sentinel-win64.exe --config=C:\path\to\goacoin.conf
 
-Set up a crontab entry to call Sentinel every minute:
+**C)** By creating a shortcut
 
-    $ crontab -e
+1) Right click the sentinel-win64.exe, "Create Shortcut". 
+2) Right click the shortcut, Properties
+3) Edit Target and, at the end, add a SPACE and then "--config=C:\path\to\goacoin.conf" INCLUDING the quotes "
 
-In the crontab editor, add the lines below, replacing '/home/YOURUSERNAME/sentinel' to the path where you cloned sentinel to:
+Double click the shortcut to start sentinel.
 
-    * * * * * cd /home/YOURUSERNAME/sentinel && ./venv/bin/python bin/sentinel.py >/dev/null 2>&1
+## When everything fails
+If you have followed all the steps and still get WATCHDOG_EXPIRED when issuing "masternode status":
 
-## Configuration
+**1.** Close the wallet
 
-An alternative (non-default) path to the `goacoin.conf` file can be specified in `sentinel.conf`:
+**2.** Delete all files inside "goacoinconf" except for "wallet.dat" and "goacoin.conf".
+**Please make sure you don't delete wallet.dat! Backup it, for real, that's your coins!**
 
-    goacoin_conf=/path/to/goacoin.conf
+**3.** Restart wallet, open sentinel-win64.exe, and let it sync!
 
-## Troubleshooting
+### Feedback
+If it doesn't work, create an *Issue* with detailed explanations
 
-To view debug output, set the `SENTINEL_DEBUG` environment variable to anything non-zero, then run the script manually:
 
-    $ SENTINEL_DEBUG=1 ./venv/bin/python bin/sentinel.py
+## Usage
 
-## Contributing
+Pick the appropiate file from [https://github.com/GoaCoin/sentinel/releases](Releases)
 
-Please follow the [GoaCoinCore guidelines for contributing](https://github.com/goacoincoin/goacoin-core/blob/v0.12.1.x/CONTRIBUTING.md).
+Open file `sentinel.conf` and change `goacoin_conf` to point to your goacoin configuration file
 
-Specifically:
+Run `sentinel.exe` and keep it open, that's all.
 
-* [Contributor Workflow](https://github.com/goacoincoin/goacoin-core/blob/v0.12.1.x/CONTRIBUTING.md#contributor-workflow)
+You might pass arguments to `sentinel.exe`, for example `sentinel.exe --config="C:\path\to\goacoin.conf"`
 
-    To contribute a patch, the workflow is as follows:
 
-    * Fork repository
-    * Create topic branch
-    * Commit patches
+# Building
 
-    In general commits should be atomic and diffs should be easy to read. For this reason do not mix any formatting fixes or code moves with actual code changes.
+Install pyinstaller `pip install pyinstaller`
 
-    Commit messages should be verbose by default, consisting of a short subject line (50 chars max), a blank line and detailed explanatory text as separate paragraph(s); unless the title alone is self-explanatory (like "Corrected typo in main.cpp") then a single title line is sufficient. Commit messages should be helpful to people reading your code in the future, so explain the reasoning for your decisions. Further explanation [here](http://chris.beams.io/posts/git-commit/).
-
-### License
-
-Released under the MIT license, under the same terms as GoaCoinCore itself. See [LICENSE](LICENSE) for more info.
+Generate output EXE/ELF: `pyinstaller --onefile --paths=lib/ main.py`

@@ -13,7 +13,7 @@ from decimal import Decimal
 import time
 
 
-class GoaCoinDaemon():
+class GoacoinDaemon():
     def __init__(self, **kwargs):
         host = kwargs.get('host', '127.0.0.1')
         user = kwargs.get('user')
@@ -32,9 +32,9 @@ class GoaCoinDaemon():
 
     @classmethod
     def from_goacoin_conf(self, goacoin_dot_conf):
-        from goacoin_config import GoaCoinConfig
-        config_text = GoaCoinConfig.slurp_config_file(goacoin_dot_conf)
-        creds = GoaCoinConfig.get_rpc_creds(config_text, config.network)
+        from goacoin_config import GoacoinConfig
+        config_text = GoacoinConfig.slurp_config_file(goacoin_dot_conf)
+        creds = GoacoinConfig.get_rpc_creds(config_text, config.network)
 
         return self(**creds)
 

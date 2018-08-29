@@ -19,7 +19,7 @@ def is_valid_goacoin_address(address, network='mainnet'):
     # 4 checksum bytes are appended so the total number of
     # base58 encoded bytes should be 25.  This means the number of characters
     # in the encoding should be about 34 ( 25 * log2( 256 ) / log2( 58 ) ).
-    goacoin_version = 112 if network == 'testnet' else 38
+    goacoin_version = 140 if network == 'testnet' else 76
 
     # Check length (This is important because the base58 library has problems
     # with long addresses (which are invalid anyway).
@@ -32,7 +32,7 @@ def is_valid_goacoin_address(address, network='mainnet'):
         decoded = base58.b58decode_chk(address)
         address_version = ord(decoded[0:1])
     except:
-        # rescue from exception, not a valid GoaCoin address
+        # rescue from exception, not a valid Goacoin address
         return False
 
     if (address_version != goacoin_version):
@@ -181,7 +181,7 @@ def create_superblock(proposals, event_block_height, budget_max, sb_epoch_time):
 
 # shims 'til we can fix the goacoind side
 def SHIM_serialise_for_goacoind(sentinel_hex):
-    from models import DASHD_GOVOBJ_TYPES
+    from models import GOACOIND_GOVOBJ_TYPES
     # unpack
     obj = deserialise(sentinel_hex)
 
@@ -189,7 +189,7 @@ def SHIM_serialise_for_goacoind(sentinel_hex):
     govtype = obj[0]
 
     # add 'type' attribute
-    obj[1]['type'] = DASHD_GOVOBJ_TYPES[govtype]
+    obj[1]['type'] = GOACOIND_GOVOBJ_TYPES[govtype]
 
     # superblock => "trigger" in goacoind
     if govtype == 'superblock':
@@ -205,7 +205,7 @@ def SHIM_serialise_for_goacoind(sentinel_hex):
 
 # shims 'til we can fix the goacoind side
 def SHIM_deserialise_from_goacoind(goacoind_hex):
-    from models import DASHD_GOVOBJ_TYPES
+    from models import GOACOIND_GOVOBJ_TYPES
 
     # unpack
     obj = deserialise(goacoind_hex)

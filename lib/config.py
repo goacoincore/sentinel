@@ -1,27 +1,67 @@
 """
     Set up defaults and read sentinel.conf
 """
+import argparse
 import sys
 import os
-from goacoin_config import GoaCoinConfig
+from goacoin_config import GoacoinConfig
+
 
 default_sentinel_config = os.path.normpath(
     os.path.join(os.path.dirname(__file__), '../sentinel.conf')
 )
+
+if not os.path.isfile(default_sentinel_config):
+    base = os.path.abspath(os.path.dirname(sys.argv[0]))
+    default_sentinel_config = os.path.join(base, 'sentinel.conf')
+
 sentinel_config_file = os.environ.get('SENTINEL_CONFIG', default_sentinel_config)
-sentinel_cfg = GoaCoinConfig.tokenize(sentinel_config_file)
+
+sentinel_cfg = GoacoinConfig.tokenize(sentinel_config_file)
 sentinel_version = "1.1.0"
 min_goacoind_proto_version_with_sentinel_ping = 70207
 
 
+def get_argarse():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', type=str, required=False)
+    parser.add_argument('--rpc-port', type=int, required=False)
+    parser.add_argument('--repair', action='store_true', default=False, required=False)
+    parser.add_argument('--sentinel', action='store_true', default=False, required=False)
+    return parser
+
+def get_args():
+    parser = get_argarse()
+
+    try:
+        args = parser.parse_args()
+    except:
+        # We are inside tests
+        parser.add_argument('folder')
+        args = parser.parse_args()
+
+    return args
+
 def get_goacoin_conf():
-    home = os.environ.get('HOME')
+    args = get_args()
 
-    goacoin_conf = os.path.join(home, ".goacoincore/goacoin.conf")
-    if sys.platform == 'darwin':
-        goacoin_conf = os.path.join(home, "Library/Application Support/GoaCoinCore/goacoin.conf")
-
-    goacoin_conf = sentinel_cfg.get('goacoin_conf', goacoin_conf)
+    if args.config:
+        goacoin_conf = args.config
+    else:
+        home = os.environ.get('HOME')
+        if home is not None:
+            if sys.platform == 'darwin':
+                goacoin_conf = os.path.join(home, "Library/Application Support/GoacoinCore/goacoin.conf")
+            else:
+                goacoin_conf = os.path.join(home, ".goacoincore/goacoin.conf")
+        else:
+            home = os.getenv('APPDATA')
+            if home is not None:
+                goacoin_conf = os.path.join(home, "goacoincore\\goacoin.conf")
+            else:
+                goacoin_conf = 'goacoin.conf'
+        
+        goacoin_conf = sentinel_cfg.get('goacoin_conf', goacoin_conf)
 
     return goacoin_conf
 

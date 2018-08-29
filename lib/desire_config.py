@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'lib'))
 from misc import printdbg
 
 
-class GoaCoinConfig():
+class GoacoinConfig():
 
     @classmethod
     def slurp_config_file(self, filename):
@@ -33,15 +33,22 @@ class GoaCoinConfig():
         # python >= 2.7
         creds = {key: value for (key, value) in match}
 
-        # standard GoaCoin defaults...
-        default_port = 12454 if (network == 'mainnet') else 13454
+        # Fetch port from args, if any (import here to avoid circular deps)
+        from config import get_args
+        args = get_args()
 
-        # use default port for network if not specified in goacoin.conf
-        if not ('port' in creds):
-            creds[u'port'] = default_port
+        if args.rpc_port:
+            creds[u'port'] = args.rpc_port
+        else:
+            # standard Goacoin defaults...
+            default_port = 9918 if (network == 'mainnet') else 19918
 
-        # convert to an int if taken from goacoin.conf
-        creds[u'port'] = int(creds[u'port'])
+            # use default port for network if not specified in goacoin.conf
+            if not ('port' in creds):
+                creds[u'port'] = default_port
+
+            # convert to an int if taken from goacoin.conf
+            creds[u'port'] = int(creds[u'port'])
 
         # return a dictionary with RPC credential key, value pairs
         return creds

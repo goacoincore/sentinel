@@ -6,7 +6,7 @@ os.environ['SENTINEL_CONFIG'] = os.path.normpath(os.path.join(os.path.dirname(__
 os.environ['SENTINEL_ENV'] = 'test'
 sys.path.append(os.path.normpath(os.path.join(os.path.dirname(__file__), '../../lib')))
 import config
-from goacoin_config import GoaCoinConfig
+from goacoin_config import GoacoinConfig
 
 
 @pytest.fixture
@@ -35,7 +35,7 @@ rpcport={rpcport}
 
 def test_get_rpc_creds():
     goacoin_config = goacoin_conf()
-    creds = GoaCoinConfig.get_rpc_creds(goacoin_config, 'testnet')
+    creds = GoacoinConfig.get_rpc_creds(goacoin_config, 'testnet')
 
     for key in ('user', 'password', 'port'):
         assert key in creds
@@ -44,7 +44,7 @@ def test_get_rpc_creds():
     assert creds.get('port') == 29241
 
     goacoin_config = goacoin_conf(rpcpassword='s00pers33kr1t', rpcport=8000)
-    creds = GoaCoinConfig.get_rpc_creds(goacoin_config, 'testnet')
+    creds = GoacoinConfig.get_rpc_creds(goacoin_config, 'testnet')
 
     for key in ('user', 'password', 'port'):
         assert key in creds
@@ -53,13 +53,13 @@ def test_get_rpc_creds():
     assert creds.get('port') == 8000
 
     no_port_specified = re.sub('\nrpcport=.*?\n', '\n', goacoin_conf(), re.M)
-    creds = GoaCoinConfig.get_rpc_creds(no_port_specified, 'testnet')
+    creds = GoacoinConfig.get_rpc_creds(no_port_specified, 'testnet')
 
     for key in ('user', 'password', 'port'):
         assert key in creds
     assert creds.get('user') == 'goacoinrpc'
     assert creds.get('password') == 'EwJeV3fZTyTVozdECF627BkBMnNDwQaVLakG3A4wXYyk'
-    assert creds.get('port') == 13454
+    assert creds.get('port') == 19918
 
 
 # ensure goacoin network (mainnet, testnet) matches that specified in config

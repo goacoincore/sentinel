@@ -5,7 +5,7 @@ sys.path.append(os.path.normpath(os.path.join(os.path.dirname(__file__), '../lib
 import init
 import config
 import misc
-from goacoind import GoaCoinDaemon
+from goacoind import GoacoinDaemon
 from models import Superblock, Proposal, GovernanceObject, Watchdog
 from models import VoteSignals, VoteOutcomes, Transient
 import socket
@@ -17,7 +17,7 @@ import atexit
 import random
 from scheduler import Scheduler
 import argparse
-
+from termcolor import colored
 
 # sync goacoind gobject list with our local relational DB backend
 def perform_goacoind_object_sync(goacoind):
@@ -157,22 +157,22 @@ def is_goacoind_port_open(goacoind):
 
 
 def main():
-    goacoind = GoaCoinDaemon.from_goacoin_conf(config.goacoin_conf)
+    goacoind = GoacoinDaemon.from_goacoin_conf(config.goacoin_conf)
     options = process_args()
 
     # check goacoind connectivity
     if not is_goacoind_port_open(goacoind):
-        print("Cannot connect to goacoind. Please ensure goacoind is running and the JSONRPC port is open to Sentinel.")
+        print(colored("Cannot connect to goacoind. Please ensure goacoind is running and the JSONRPC port is open to Sentinel.", 'red'))
         return
 
     # check goacoind sync
     if not goacoind.is_synced():
-        print("goacoind not synced with network! Awaiting full sync before running Sentinel.")
+        print(colored("goacoind not synced with network! Awaiting full sync before running Sentinel.", 'yellow'))
         return
 
     # ensure valid masternode
     if not goacoind.is_masternode():
-        print("Invalid Masternode Status, cannot continue.")
+        print(colored('yellow', "Invalid Masternode Status, cannot continue."))
         return
 
     # register a handler if SENTINEL_DEBUG is set
@@ -230,12 +230,12 @@ def signal_handler(signum, frame):
     sys.exit(1)
 
 
-def cleanup():
+def cleanup(mutex_key):
     Transient.delete(mutex_key)
 
 
 def process_args():
-    parser = argparse.ArgumentParser()
+    parser = config.get_argarse()
     parser.add_argument('-b', '--bypass-scheduler',
                         action='store_true',
                         help='Bypass scheduler and sync/vote immediately',
@@ -245,12 +245,14 @@ def process_args():
     return args
 
 
-if __name__ == '__main__':
-    atexit.register(cleanup)
+def entrypoint():
+    # ensure another instance of Sentinel pointing at the same config
+    # is not currently running
+    mutex_key = 'SENTINEL_RUNNING_' + config.goacoin_conf
+
+    atexit.register(cleanup, mutex_key)
     signal.signal(signal.SIGINT, signal_handler)
 
-    # ensure another instance of Sentinel is not currently running
-    mutex_key = 'SENTINEL_RUNNING'
     # assume that all processes expire after 'timeout_seconds' seconds
     timeout_seconds = 90
 
@@ -265,3 +267,6 @@ if __name__ == '__main__':
     main()
 
     Transient.delete(mutex_key)
+
+if __name__ == '__main__':
+    entrypoint()

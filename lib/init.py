@@ -1,3 +1,4 @@
+from builtins import input
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -65,7 +66,7 @@ def has_goacoin_conf():
 
     # ensure goacoin_conf exists & readable
     #
-    # if not, print a message stating that GoaCoin Core must be installed and
+    # if not, print a message stating that Goacoin Core must be installed and
     # configured, including JSONRPC access in goacoin.conf
     try:
         f = io.open(config.goacoin_conf)
@@ -84,19 +85,27 @@ def main():
 
     if not is_valid_python_version():
         print("Python %s is not supported" % python_short_ver_str())
+
+        input('Press [ENTER] to exit')
         sys.exit(1)
 
     if not are_deps_installed():
         print("Please ensure all dependencies are installed:")
         print(install_instructions)
+
+        input('Press [ENTER] to exit')
         sys.exit(1)
 
     if not is_database_correctly_configured():
         print("Please ensure correct database configuration.")
+
+        input('Press [ENTER] to exit')
         sys.exit(1)
 
     if not has_goacoin_conf():
-        print("GoaCoinCore must be installed and configured, including JSONRPC access in goacoin.conf")
+        print("GoacoinCore must be installed and configured, including JSONRPC access in goacoin.conf")
+        
+        input('Press [ENTER] to exit')
         sys.exit(1)
 
 

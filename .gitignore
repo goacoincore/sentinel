@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Visual studio code
+.vscode
+.vscode/*
+
 # C extensions
 *.so
 
@@ -93,6 +97,7 @@ ENV/
 # OS specific and other
 .DS_Store
 docs/.DS_Store
+.keep
 
 # ignore everything in ignore/
 ignore/

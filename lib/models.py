@@ -29,7 +29,7 @@ db.connect()
 
 
 # TODO: lookup table?
-DASHD_GOVOBJ_TYPES = {
+GOACOIND_GOVOBJ_TYPES = {
     'proposal': 1,
     'superblock': 2,
     'watchdog': 3,
@@ -138,7 +138,7 @@ class GovernanceObject(BaseModel):
             printdbg("govobj updated = %d" % count)
         subdikt['governance_object'] = govobj
 
-        # get/create, then sync payment amounts, etc. from goacoind - GoaCoind is the master
+        # get/create, then sync payment amounts, etc. from goacoind - Goacoind is the master
         try:
             newdikt = subdikt.copy()
             newdikt['object_hash'] = object_hash
@@ -268,7 +268,7 @@ class Proposal(GovernanceClass, BaseModel):
     payment_amount = DecimalField(max_digits=16, decimal_places=8)
     object_hash = CharField(max_length=64)
 
-    govobj_type = DASHD_GOVOBJ_TYPES['proposal']
+    govobj_type = GOACOIND_GOVOBJ_TYPES['proposal']
 
     class Meta:
         db_table = 'proposals'
@@ -306,7 +306,7 @@ class Proposal(GovernanceClass, BaseModel):
 
             # payment address is valid base58 goacoin addr, non-multisig
             if not goacoinlib.is_valid_goacoin_address(self.payment_address, config.network):
-                printdbg("\tPayment address [%s] not a valid GoaCoin address for network [%s], returning False" % (self.payment_address, config.network))
+                printdbg("\tPayment address [%s] not a valid Goacoin address for network [%s], returning False" % (self.payment_address, config.network))
                 return False
 
             # URL
@@ -364,7 +364,7 @@ class Proposal(GovernanceClass, BaseModel):
         if (self.end_epoch < (misc.now() - thirty_days)):
             return True
 
-        # TBD (item moved to external storage/GoaCoinDrive, etc.)
+        # TBD (item moved to external storage/GoacoinDrive, etc.)
         return False
 
     @classmethod
@@ -440,7 +440,7 @@ class Superblock(BaseModel, GovernanceClass):
     sb_hash = CharField()
     object_hash = CharField(max_length=64)
 
-    govobj_type = DASHD_GOVOBJ_TYPES['superblock']
+    govobj_type = GOACOIND_GOVOBJ_TYPES['superblock']
     only_masternode_can_submit = True
 
     class Meta:
@@ -489,7 +489,7 @@ class Superblock(BaseModel, GovernanceClass):
 
     def is_deletable(self):
         # end_date < (current_date - 30 days)
-        # TBD (item moved to external storage/GoaCoinDrive, etc.)
+        # TBD (item moved to external storage/GoacoinDrive, etc.)
         pass
 
     def hash(self):
@@ -600,7 +600,7 @@ class Watchdog(BaseModel, GovernanceClass):
     created_at = IntegerField()
     object_hash = CharField(max_length=64)
 
-    govobj_type = DASHD_GOVOBJ_TYPES['watchdog']
+    govobj_type = GOACOIND_GOVOBJ_TYPES['watchdog']
     only_masternode_can_submit = True
 
     @classmethod
